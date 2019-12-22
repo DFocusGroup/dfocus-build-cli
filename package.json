@@ -1,0 +1,28 @@
+{
+  "name": "df-build-cli",
+  "version": "1.0.1",
+  "description": "dfcous 打包脚手架",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "dfb": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dengnan123/dfocus-build-cli.git"
+  },
+  "author": "dany",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dengnan123/dfocus-build-cli/issues"
+  },
+  "homepage": "https://github.com/dengnan123/dfocus-build-cli#readme",
+  "dependencies": {
+    "fs-extra": "^8.1.0",
+    "inquirer": "^7.0.1",
+    "lodash": "^4.17.15",
+    "shelljs": "^0.8.3"
+  }
+}

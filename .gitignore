@@ -1,0 +1,20 @@
+#npm
+dist
+node_modules
+yarn.lock
+npm-debug.log
+package-lock.json
+.out
+*zip-dist
+*.zip
+
+# ide
+.idea
+.vscode
+
+# Mac General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+.nobindings
