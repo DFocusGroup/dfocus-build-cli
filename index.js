@@ -5,6 +5,14 @@ const shell = require("shelljs");
 const fs = require("fs-extra");
 const lodash = require("lodash");
 
+const {
+  formatJson,
+  readData,
+  writeData,
+  moveFile,
+  template
+} = require("./utils/index");
+
 shell.exec("pwd", async function(err, pwd) {
   if (err) {
     return;
@@ -13,9 +21,14 @@ shell.exec("pwd", async function(err, pwd) {
     const _pwd = pwd.trim(); // 为啥有空格啊 坑死我了
     console.log("pwd.....", _pwd);
     // 读取   pkg 下面 scripts 的 server 的值
-    const { INJECTED_MODULE, BASE } = await getInputInfo();
+    const { INJECTED_MODULE, BASE, NODE_TITLE } = await getInputInfo();
+    let nodeTitle = "node server --title=";
+    nodeTitle = `${nodeTitle}${NODE_TITLE}`;
     console.log(`INJECTED_MODULE  is: ${INJECTED_MODULE}`);
     console.log(`BASE is: ${BASE}`);
+    console.log(`NODE_TITLE is: ${nodeTitle}`);
+    // 首先更改 pkg里面的  scripts 下面的 serve 值
+    changePkg(_pwd, nodeTitle);
     const outputName = getOutputName(INJECTED_MODULE);
     console.log(`Dir name is: ${outputName}`);
     // 先找到 当前目录下 所有包含dfocus-fe-meeting 的文件 或者 文件夹
@@ -50,20 +63,10 @@ shell.exec("pwd", async function(err, pwd) {
   }
 });
 
-function readData(_path) {
-  return JSON.parse(fs.readFileSync(_path, "utf-8"));
-}
-
-function writeData(_path, data) {
-  fs.outputFileSync(_path, data, {
-    encoding: "utf8"
-  });
-}
-
 function changeBase(_pwd, base) {
   let data = readData(`${_pwd}/base.json`);
   data.proBase = base;
-  writeData(`${_pwd}/base.json`, JSON.stringify(data));
+  writeData(`${_pwd}/base.json`, formatJson(data));
 }
 
 function writeStopToBin(_pwd, outputName) {
@@ -78,8 +81,10 @@ function writeStopToBin(_pwd, outputName) {
   writeData(`${_pwd}/${outputName}/bin/stop.sh`, data);
 }
 
-async function moveFile(srcPath, toPath) {
-  await fs.copy(srcPath, toPath);
+function changePkg(_pwd, nodeTitle) {
+  let data = readData(`${_pwd}/package.json`);
+  data.scripts.serve = nodeTitle;
+  writeData(`${_pwd}/package.json`, formatJson(data));
 }
 
 async function getInputInfo() {
@@ -97,6 +102,12 @@ async function getInputInfo() {
           name: "BASE",
           message: "Please input deploy directory",
           default: "/"
+        },
+        {
+          type: "input",
+          name: "NODE_TITLE",
+          message: "Please input deploy directory",
+          default: "DMEETING_PC"
         }
       ])
       .then(answers => {
@@ -138,9 +149,4 @@ async function execShell(shellStr, ifErrorMsg) {
   if (code || stderr) {
     throw new Error(stderr || ifErrorMsg);
   }
-}
-
-function template(filePath, opts) {
-  const content = fs.readFileSync(filePath, { encoding: "utf8" });
-  return lodash.template(content, { interpolate: /<%=([\s\S]+?)%>/g })(opts);
 }
