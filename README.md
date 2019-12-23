@@ -35,9 +35,10 @@ npm run build:prod
 ```
 
 ### 运行时有三个参数需要输入，INJECTED_MODULE，NODE_TITLE ，BASE
-#### INJECTED_MODULE 比如  ads
-#### NODE_TITLE 比如 DMEETING_PC
-#### BASE 比如 /meeting/
+#### 比如我要把项目部署成阿迪的项目，并且部署到/meeting/目录下面
+#### INJECTED_MODULE >>>  ads
+#### NODE_TITLE >>> 使用默认值
+#### BASE >>> /meeting/
 
 
 ### 效果图如下
