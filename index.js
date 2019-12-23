@@ -3,8 +3,7 @@
 const inquirer = require("inquirer");
 const shell = require("shelljs");
 const fs = require("fs-extra");
-const lodash = require("lodash");
-
+const format = "zip-dist";
 const {
   formatJson,
   readData,
@@ -18,10 +17,12 @@ shell.exec("pwd", async function(err, pwd) {
     return;
   }
   try {
-    const _pwd = pwd.trim(); // 为啥有空格啊 坑死我了
-    console.log("pwd.....", _pwd);
-    // 读取   pkg 下面 scripts 的 server 的值
+    const _pwd = getPwd(pwd);
+
+    //获取   base.json 里面的 outputName值
+    let OUTPUTNAME = getDefOutputName(_pwd);
     const { INJECTED_MODULE, BASE, NODE_TITLE } = await getInputInfo();
+
     let nodeTitle = "node server --title=";
     nodeTitle = `${nodeTitle}${NODE_TITLE}`;
     console.log(`INJECTED_MODULE  is: ${INJECTED_MODULE}`);
@@ -29,10 +30,12 @@ shell.exec("pwd", async function(err, pwd) {
     console.log(`NODE_TITLE is: ${nodeTitle}`);
     // 首先更改 pkg里面的  scripts 下面的 serve 值
     changePkg(_pwd, nodeTitle);
-    const outputName = getOutputName(INJECTED_MODULE);
+    console.log("OUTPUTNAMEOUTPUTNAME", OUTPUTNAME);
+    const outputName = getOutputName(INJECTED_MODULE, OUTPUTNAME);
     console.log(`Dir name is: ${outputName}`);
-    // 先找到 当前目录下 所有包含dfocus-fe-meeting 的文件 或者 文件夹
+    // 先找到 当前目录下 所有包含projectName的文件 或者 文件夹
     const shouldDelNames = await getDeleteNames(_pwd);
+    console.log("删除文件>>>>>", shouldDelNames);
     //   # 删除之前打包好的项目
     const delArrPro = shouldDelNames.map(v => {
       return removeFile(`${_pwd}/${v}`);
@@ -63,6 +66,17 @@ shell.exec("pwd", async function(err, pwd) {
   }
 });
 
+function getPwd(pwd) {
+  const _pwd = pwd.trim(); // 为啥有空格啊 坑死我了
+  console.log("pwd.....", _pwd);
+  return _pwd;
+}
+
+function getDefOutputName(_pwd) {
+  const data = readData(`${_pwd}/base.json`);
+  return data.outputName;
+}
+
 function changeBase(_pwd, base) {
   let data = readData(`${_pwd}/base.json`);
   data.proBase = base;
@@ -77,7 +91,7 @@ function writeStopToBin(_pwd, outputName) {
   const data = template(`${_pwd}/shells/stop.sh`, {
     NODE_TITAL: nodeTitle
   });
-  console.log("datadata", data);
+
   writeData(`${_pwd}/${outputName}/bin/stop.sh`, data);
 }
 
@@ -87,7 +101,7 @@ function changePkg(_pwd, nodeTitle) {
   writeData(`${_pwd}/package.json`, formatJson(data));
 }
 
-async function getInputInfo() {
+async function getInputInfo(defOutputName) {
   return new Promise((reslove, reject) => {
     inquirer
       .prompt([
@@ -109,17 +123,39 @@ async function getInputInfo() {
           message: "Please input node_title",
           default: "DMEETING_PC"
         }
+        // {
+        //   type: "input",
+        //   name: "OUTPUTNAME",
+        //   message: "Please input outputName",
+        //   default: defOutputName
+        // }
       ])
       .then(answers => {
-        reslove(answers);
+        // const _outputName = dealwithOutputName(answers.OUTPUTNAME);
+        reslove({
+          ...answers
+          //   OUTPUTNAME: _outputName
+        });
       });
   });
+}
+
+function dealwithOutputName(OUTPUTNAME) {
+  // 对OUTPUTNAME 字段特殊处理下 如果用户输入是  test-ads 那就给他转化为  test-ads-zip-dist,如果用户输入是 test-ads-zip-dist 就不处理
+  const arr = OUTPUTNAME.split(format);
+  // 如果 defOutputName "bmw-desking-web-zip-dist"  split 后 为 ["bmw-desking-web-", ""]
+  if (arr.length !== 2) {
+    // 不等于2 说明test-ads-zip-dist这种格式
+    return `${OUTPUTNAME}-${format}`;
+  }
+  return OUTPUTNAME;
 }
 
 async function getDeleteNames(filePath) {
   const files = await fs.readdir(filePath);
   return files.filter(v => {
-    if (v.includes("dfocus-fe-meeting")) {
+    if (v.includes(format)) {
+      // 获取所有包含 zip-dist 的文件
       return true;
     }
     return false;
@@ -134,19 +170,35 @@ async function removeFile(path) {
   });
 }
 
-function getOutputName(INJECTED_MODULE) {
+function getProjectName(defOutputName) {
+  const arr = defOutputName.split(format);
+  // 如果 defOutputName "bmw-desking-web-zip-dist"  split 后 为 ["bmw-desking-web-", ""]
+  if (arr.length !== 2) {
+    return "";
+  }
+  return arr[0];
+}
+
+function getOutputName(INJECTED_MODULE, defOutputName) {
   if (!INJECTED_MODULE) {
-    return "dfocus-fe-meeting-zip-dist";
+    return defOutputName;
   }
   if (INJECTED_MODULE === "dfocus") {
-    return "dfocus-fe-meeting-zip-dist";
+    return defOutputName;
   }
-  return `dfocus-fe-meeting-${INJECTED_MODULE}-zip-dist`;
+  const projectName = getProjectName(defOutputName);
+  if (!projectName) {
+    return defOutputName;
+  }
+  return `${projectName}${INJECTED_MODULE}-${format}`;
 }
 
 async function execShell(shellStr, ifErrorMsg) {
-  const { code, stderr } = await shell.exec(shellStr);
-  if (code || stderr) {
+  console.log("exec shell", shellStr);
+  const { stderr, code } = await shell.exec(shellStr);
+  if (code) {
+    console.log("shell err msg >>>>", stderr);
+    console.log("errcode>>>", code);
     throw new Error(stderr || ifErrorMsg);
   }
 }
