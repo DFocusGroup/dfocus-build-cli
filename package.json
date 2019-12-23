@@ -1,6 +1,6 @@
 {
   "name": "df-build-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "dfcous 打包脚手架",
   "main": "index.js",
   "scripts": {

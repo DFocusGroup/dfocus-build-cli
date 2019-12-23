@@ -8,7 +8,7 @@
 #### 2.在src 下面的utils里面的env.js 改动如下代码
 ![image.png](https://cdn.nlark.com/yuque/0/2019/png/93166/1577075613857-0c95faa7-07ea-4b90-992c-9c052be5aeee.png#align=left&display=inline&height=681&name=image.png&originHeight=1362&originWidth=2276&size=341946&status=done&style=none&width=1138)
 
-#### 3.utils 里面的 config.js的base取值防暑该改变下，如下
+#### 3.utils 里面的 config.js的base取值需改动，如下
 
 ![image.png](https://cdn.nlark.com/yuque/0/2019/png/93166/1577075792485-e9289749-bfc9-4ac0-943b-d088d6df5308.png#align=left&display=inline&height=662&name=image.png&originHeight=1324&originWidth=2266&size=507414&status=done&style=none&width=1133)
 ,
