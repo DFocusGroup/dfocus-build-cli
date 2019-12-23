@@ -106,7 +106,7 @@ async function getInputInfo() {
         {
           type: "input",
           name: "NODE_TITLE",
-          message: "Please input deploy directory",
+          message: "Please input node_title",
           default: "DMEETING_PC"
         }
       ])
