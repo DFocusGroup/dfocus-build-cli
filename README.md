@@ -50,3 +50,11 @@ npm run build:prod
 ### 效果图如下
 ![avatar](https://github.com/DFocusGroup/dfocus-build-cli/blob/master/doc/dfb.gif)
 ### 当然，如果不需要改动这个三个参数的话，就一路回车，使用默认值
+
+### 这个脚手架为啥会出现
+
+- 1.js写的大家都能维护，反正我对shell语法不感冒，虽然shell很简洁
+
+- 2.有时间私有化部署的时候，用户不让部署到/目录下面，这样我们就需要手动改base，然后改动很少，但是改动，就意味你动了源码，有风险
+
+-  3.有时间需要更改node title 我要更改两个地方，pkg里面要改动，shells文件下面的stop.sh 也需要改动，风险点和第二点一样
