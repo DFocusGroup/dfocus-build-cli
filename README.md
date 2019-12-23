@@ -27,7 +27,5 @@ npm run build:prod
 
 
 ### 效果图如下
-
-
-![avatar](https://cdn.nlark.com/yuque/0/2019/gif/93166/1577070819963-eb95253a-3cfa-484f-9189-c720688a5364.gif#align=left&display=inline&height=820&name=dfb%20%281%29.gif&originHeight=820&originWidth=1436&size=8020908&status=done&style=none&width=1436)
+![avatar]('./doc/dfb (1).gif)
 ### 当然，如果不需要改动的话，就一路回车，使用默认值
