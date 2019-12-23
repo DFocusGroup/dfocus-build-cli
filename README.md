@@ -27,5 +27,5 @@ npm run build:prod
 
 
 ### 效果图如下
-![avatar]('./doc/dfb (1).gif)
+![avatar](https://github.com/DFocusGroup/dfocus-build-cli/blob/master/doc/dfb%20(1).gif)
 ### 当然，如果不需要改动的话，就一路回车，使用默认值
