@@ -42,4 +42,4 @@ npm run build:prod
 
 ### 效果图如下
 ![avatar](https://github.com/DFocusGroup/dfocus-build-cli/blob/master/doc/dfb.gif)
-### 当然，如果不需要改动的话，就一路回车，使用默认值
+### 当然，如果不需要改动这个三个参数的话，就一路回车，使用默认值
