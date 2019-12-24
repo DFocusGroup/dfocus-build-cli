@@ -26,6 +26,27 @@ function template(filePath, opts) {
   return lodash.template(content, { interpolate: /<%=([\s\S]+?)%>/g })(opts);
 }
 
+function isArray(params) {
+  return (
+    Object.prototype.toString.call(params) === "[object Array]" &&
+    !isNaN(params)
+  );
+}
+
+function isString(params) {
+  return Object.prototype.toString.call(params) === "[object String]";
+}
+
+// function hasValue(v) {
+//   if (!v) {
+//     return false;
+//   }
+//   if (!isArray(v) || !isString(v)) {
+//     return false;
+//   }
+//   return v.includes('')
+// }
+
 module.exports = {
   formatJson,
   readData,

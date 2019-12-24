@@ -20,8 +20,17 @@ shell.exec("pwd", async function(err, pwd) {
     const _pwd = getPwd(pwd);
 
     //获取   base.json 里面的 outputName值
-    let OUTPUTNAME = getDefOutputName(_pwd);
-    const { INJECTED_MODULE, BASE, NODE_TITLE } = await getInputInfo();
+    let { outputName: OUTPUTNAME, nodeDependencies } = getBaseJson(_pwd);
+    if (!OUTPUTNAME) {
+      throw new Error("base.json has not outputName filed");
+    }
+    nodeDependencies = checkDeps(nodeDependencies); // node 必须要有的依赖项
+
+    const defNodeTitle = getDefNodeTitle(_pwd);
+
+    const { INJECTED_MODULE, BASE, NODE_TITLE } = await getInputInfo(
+      defNodeTitle
+    );
 
     let nodeTitle = "node server --title=";
     nodeTitle = `${nodeTitle}${NODE_TITLE}`;
@@ -57,6 +66,14 @@ shell.exec("pwd", async function(err, pwd) {
     await Promise.all(moveArr);
     // 拷贝stop.sh到打包目录
     writeStopToBin(_pwd, outputName);
+    shell.cd(`${_pwd}/${outputName}`);
+    // 安装node的依赖
+    const installNodeStrShell = getNodeStrShell(nodeDependencies);
+    await execShell(
+      installNodeStrShell,
+      "Install node  runtime dependencies failed, check network first!"
+    );
+    shell.cd(`${_pwd}`);
     await execShell(
       `zip -r "${outputName}.zip" ${outputName}`,
       "Install runtime dependencies failed, check network first!"
@@ -66,15 +83,49 @@ shell.exec("pwd", async function(err, pwd) {
   }
 });
 
+function getDefNodeTitle(_pwd) {
+  const {
+    scripts: { serve: nodeTitle }
+  } = readData(`${_pwd}/package.json`);
+  console.log("def nodeTitle", nodeTitle);
+  const format = "node server --title=";
+  const arr = nodeTitle.split(format);
+  if (arr.length !== 2) {
+    throw new Error("scripts serve format error");
+  }
+  return arr[1];
+}
+
+function checkDeps(nodeDependencies) {
+  if (!nodeDependencies || nodeDependencies.length === 0) {
+    nodeDependencies = ["express", "replace-in-file"];
+  } else {
+    if (!nodeDependencies.includes("express")) {
+      nodeDependencies.push("express");
+    }
+    if (!nodeDependencies.includes("replace-in-file")) {
+      nodeDependencies.push("replace-in-file");
+    }
+  }
+  return nodeDependencies;
+}
+
+function getNodeStrShell(arr) {
+  let str = "npm install";
+  for (let v of arr) {
+    str = `${str} ${v}`;
+  }
+  return str;
+}
+
 function getPwd(pwd) {
   const _pwd = pwd.trim(); // 为啥有空格啊 坑死我了
   console.log("pwd.....", _pwd);
   return _pwd;
 }
 
-function getDefOutputName(_pwd) {
-  const data = readData(`${_pwd}/base.json`);
-  return data.outputName;
+function getBaseJson(_pwd) {
+  return readData(`${_pwd}/base.json`);
 }
 
 function changeBase(_pwd, base) {
@@ -101,7 +152,7 @@ function changePkg(_pwd, nodeTitle) {
   writeData(`${_pwd}/package.json`, formatJson(data));
 }
 
-async function getInputInfo(defOutputName) {
+async function getInputInfo(defNodeTitle) {
   return new Promise((reslove, reject) => {
     inquirer
       .prompt([
@@ -121,7 +172,7 @@ async function getInputInfo(defOutputName) {
           type: "input",
           name: "NODE_TITLE",
           message: "Please input node_title",
-          default: "DMEETING_PC"
+          default: defNodeTitle
         }
         // {
         //   type: "input",
