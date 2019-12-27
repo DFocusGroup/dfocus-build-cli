@@ -2,6 +2,7 @@
 
 const fs = require("fs-extra");
 const lodash = require("lodash");
+const shell = require("shelljs")
 
 function formatJson(data) {
   return JSON.stringify(data, null, 2);
@@ -37,6 +38,18 @@ function isString(params) {
   return Object.prototype.toString.call(params) === "[object String]";
 }
 
+
+async function execShell(shellStr, ifErrorMsg) {
+  console.log("exec shell", shellStr)
+  const { stderr, code } = await shell.exec(shellStr)
+  if (code) {
+    console.log("shell err msg >>>>", stderr)
+    console.log("errcode>>>", code)
+    throw new Error(stderr || ifErrorMsg)
+  }
+}
+
+
 // function hasValue(v) {
 //   if (!v) {
 //     return false;
@@ -52,5 +65,6 @@ module.exports = {
   readData,
   writeData,
   moveFile,
-  template
+  template,
+  execShell
 };
